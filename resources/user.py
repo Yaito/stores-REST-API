@@ -38,7 +38,7 @@ class User(Resource):
         user = UserModel.find_by_id(user_id)
         if not user:
             return {'message': 'user not found'}, 404 #Not Found
-        return user.json
+        return user.json()
         
 
     @classmethod
