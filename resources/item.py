@@ -1,10 +1,18 @@
 from flask_restful import Resource, reqparse
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, jwt_optional, get_jwt_identity, fresh_jwt_required
 from models.item import ItemModel
 
 class ItemList(Resource):
+    @jwt_optional
     def get(self):
-        return {'items': [item.json() for item in ItemModel.find_all()]}
+        user_id = get_jwt_identity()
+        items = [item.json() for item in ItemModel.find_all()]
+        if user_id:
+            return {'items': items}
+        return {
+            'items': [items['name'] for item in items],
+            'message': 'More detailed infor if logged in.'
+        }, 200
         # return {'items': list(map(lambda x: x.json(), ItemModel.query.all()))}
 
 
@@ -28,6 +36,7 @@ class Item(Resource):
             return item.json()
         return {"message": "item name not found"}, 404 #Not Found
 
+    @fresh_jwt_required
     def post(self, name):
         if ItemModel.find_by_name(name):
             return {'message': "Item named '{}' already exists.".format(name)}, 400 #Bad Request
@@ -43,6 +52,7 @@ class Item(Resource):
 
         return item.json(), 201 #Created
 
+    @jwt_required
     def delete(self,name):
         item = ItemModel.find_by_name(name)
         if item:
