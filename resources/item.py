@@ -10,7 +10,7 @@ class ItemList(Resource):
         if user_id:
             return {'items': items}
         return {
-            'items': [item.name for item in items],
+            'items': [item['name'] for item in items],
             'message': 'More detailed infor if logged in.'
         }, 200
         # return {'items': list(map(lambda x: x.json(), ItemModel.query.all()))}
